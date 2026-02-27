@@ -39,7 +39,7 @@ properties:
   note.title:
     displayName: Title
 views:
-  - type: bases-cms
+  - type: cms
     name: Vault CMS Guide
     filters:
       and:

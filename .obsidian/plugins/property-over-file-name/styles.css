@@ -256,6 +256,12 @@
   height: 16px;
 }
 
+/* Excluded files styling */
+.suggestion-item.mod-excluded {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
 /* Let Obsidian handle footer styling - don't override */
 
 /* Remove incorrect modal flex layout */

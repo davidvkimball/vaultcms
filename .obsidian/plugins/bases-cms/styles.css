@@ -570,9 +570,18 @@ body.bases-cms-card-background-custom .bases-cms .card {
 /* Selection checkbox */
 .bases-cms-select-checkbox {
 	position: absolute;
-	top: 8px;
-	right: 8px;
-	z-index: 10;
+	top: 16px;
+	right: 14px;
+	z-index: 11;
+	--checkbox-click-radius: var(--bases-cms-checkbox-click-radius, 32px);
+	width: var(--checkbox-click-radius);
+	height: var(--checkbox-click-radius);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform: translate(50%, -50%);
+	margin: 0;
+	padding: 0;
 }
 
 /* Hide checkboxes when Style Settings option is enabled */
@@ -582,16 +591,9 @@ body.bases-cms-hide-checkboxes .bases-cms .bases-cms-select-checkbox {
 
 .bases-cms-select-checkbox input[type="checkbox"] {
 	cursor: default;
-	margin: 0 auto;
+	margin: 0;
 	padding: 0;
 	flex-shrink: 0;
-}
-
-/* Click radius - expand clickable area */
-.bases-cms-select-checkbox {
-	--checkbox-click-radius: var(--bases-cms-checkbox-click-radius, 32px);
-	padding: calc((var(--checkbox-click-radius) - 14px) / 2);
-	margin: calc((var(--checkbox-click-radius) - 14px) / -2);
 }
 
 /* For cover images, add subtle drop shadow for visibility on light images */
@@ -929,46 +931,24 @@ body.bases-cms-date-color-custom .bases-cms .card-date {
 	filter: brightness(1.15);
 }
 
-/* For cover images, position absolutely on the cover itself */
-.bases-cms .card.image-format-cover .card-cover .card-status-badge {
+/* Position badge absolutely at top-left, vertically aligned with checkbox */
+.bases-cms .card .card-status-badge {
 	position: absolute;
-	top: 8px;
+	top: 16px;
 	left: 8px;
+	transform: translateY(-50%);
 	z-index: 11;
-	margin-bottom: 0;
-	/* Ensure badge is always visible */
-	display: inline-flex !important;
-	visibility: visible !important;
-	opacity: 1 !important;
-}
-
-/* For cover placeholders, position badge on the placeholder */
-.bases-cms .card.image-format-cover .card-cover-placeholder .card-status-badge {
-	position: absolute;
-	top: 8px;
-	left: 8px;
-	z-index: 11;
-	margin-bottom: 0;
-	/* Ensure badge is always visible */
-	display: inline-flex !important;
-	visibility: visible !important;
-	opacity: 1 !important;
-}
-
-/* For non-cover formats (thumbnail/none), position badge above title */
-.bases-cms .card:not(.image-format-cover) .card-status-badge {
-	position: absolute;
-	top: 8px;
-	left: 8px;
-	z-index: 10;
 	margin: 0;
-	margin-bottom: 6px;
+	/* Ensure badge is always visible */
+	display: inline-flex !important;
+	visibility: visible !important;
+	opacity: 1 !important;
 	width: auto;
 }
 
 /* Add top margin to title when badge is present so it appears below the badge */
 .bases-cms .card:not(.image-format-cover):has(.card-status-badge) .card-title {
-	margin-top: 26px;
+	margin-top: 28px;
 }
 
 /* Badge style presets */
