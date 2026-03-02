@@ -17,7 +17,7 @@ The open-source headless content management system that turns [Obsidian](https:/
 The fastest way to install Vault CMS into your Astro project is via the CLI at your project root:
 
 ```bash
-pnpm create vault-cms
+pnpm create vaultcms
 ```
 
 *Follow the prompts to install into `src/content` or your desired sub-directory.*
@@ -36,7 +36,7 @@ If you prefer to install manually, you can download the latest version of Vault 
 If you are using a supported theme like **Starlight**, **Slate**, or **Chiri**, you can use a preconfigured preset:
 
 ```bash
-pnpm create vault-cms -- --template starlight
+pnpm create vaultcms -- --template starlight
 ```
 
 See all available presets at the [Presets Repo](https://github.com/davidvkimball/vault-cms-presets).
