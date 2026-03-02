@@ -19,7 +19,7 @@ program
 
 program
   .argument('[target]', 'target directory')
-  .option('-t, --template <name>', 'template to use (from vault-cms-presets)')
+  .option('-t, --template <name>', 'template to use (from vaultcms-presets)')
   .action(async (target, options) => {
     try {
       console.log('🚀 Initializing Vault CMS Installer...');
@@ -66,10 +66,10 @@ program
       }
 
       const targetDir = path.resolve(targetPath);
-      const tempZip = path.join(targetDir, 'vault-cms-temp.zip');
-      const extractDir = path.join(targetDir, '.vault-cms-temp-extract');
+      const tempZip = path.join(targetDir, 'vaultcms-temp.zip');
+      const extractDir = path.join(targetDir, '.vaultcms-temp-extract');
 
-      const repoName = template ? 'vault-cms-presets' : 'vault-cms';
+      const repoName = template ? 'vaultcms-presets' : 'vaultcms';
       const zipUrl = `https://github.com/davidvkimball/${repoName}/archive/refs/heads/master.zip`;
 
       console.log(`\n🚀 Installing Vault CMS${template ? ` (template: ${template})` : ''}...`);
@@ -198,7 +198,7 @@ async function findProjectRoot(startDir) {
 
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'vault-cms-installer' } }, (res) => {
+    https.get(url, { headers: { 'User-Agent': 'vaultcms-installer' } }, (res) => {
       if (res.statusCode === 301 || res.statusCode === 302) {
         return downloadFile(res.headers.location, dest).then(resolve).catch(reject);
       }
@@ -217,8 +217,8 @@ function downloadFile(url, dest) {
 
 function fetchTemplates() {
   return new Promise((resolve) => {
-    const url = 'https://api.github.com/repos/davidvkimball/vault-cms-presets/contents';
-    https.get(url, { headers: { 'User-Agent': 'vault-cms-installer' } }, (res) => {
+    const url = 'https://api.github.com/repos/davidvkimball/vaultcms-presets/contents';
+    https.get(url, { headers: { 'User-Agent': 'vaultcms-installer' } }, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => {

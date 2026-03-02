@@ -1,6 +1,6 @@
 {
   "name": "create-vaultcms",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Installer for Vault CMS",
   "main": "src/cli.js",
   "bin": {
@@ -17,16 +17,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidvkimball/vault-cms.git"
+    "url": "git+https://github.com/davidvkimball/vaultcms.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/davidvkimball/vault-cms/issues"
+    "url": "https://github.com/davidvkimball/vaultcms/issues"
   },
-  "homepage": "https://github.com/davidvkimball/vault-cms#readme",
+  "homepage": "https://github.com/davidvkimball/vaultcms#readme",
   "dependencies": {
     "adm-zip": "^0.5.16",
     "commander": "^14.0.2",

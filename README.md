@@ -26,7 +26,7 @@ pnpm create vaultcms
 
 If you prefer to install manually, you can download the latest version of Vault CMS and place it directly into your Astro project.
 
-1. **Download the source**: [Clone this repository](https://github.com/davidvkimball/vault-cms) or [download the ZIP archive](https://github.com/davidvkimball/vault-cms/archive/refs/heads/master.zip).
+1. **Download the source**: [Clone this repository](https://github.com/davidvkimball/vaultcms) or [download the ZIP archive](https://github.com/davidvkimball/vaultcms/archive/refs/heads/master.zip).
 2. **Locate your content directory**: In most Astro projects, this is `src/content`.
 3. **Move the files**: Copy the `.obsidian` and `_bases` folders (and `_GUIDE.md`) from the Vault CMS source into your content directory.
 4. **Open in Obsidian**: Open the content directory as a new vault in Obsidian.
@@ -39,7 +39,7 @@ If you are using a supported theme like **Starlight**, **Slate**, or **Chiri**, 
 pnpm create vaultcms -- --template starlight
 ```
 
-See all available presets at the [Presets Repo](https://github.com/davidvkimball/vault-cms-presets).
+See all available presets at the [Presets Repo](https://github.com/davidvkimball/vaultcms-presets).
 
 ## Deep Dive
 

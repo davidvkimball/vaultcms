@@ -259,7 +259,7 @@ var DEFAULT_SETTINGS = {
   attachmentFolderName: void 0,
   preset: "vanilla",
   presetName: "",
-  presetsRepo: "davidvkimball/vault-cms-presets",
+  presetsRepo: "davidvkimball/vaultcms-presets",
   enableEditingToolbar: false,
   enableExtendedFileTypes: false,
   enabledPlugins: [],
@@ -865,7 +865,7 @@ var WizardStateManager = class {
       attachmentFolderName,
       preset: settings.preset || "vanilla",
       presetName: settings.presetName || "",
-      presetsRepo: settings.presetsRepo || "davidvkimball/vault-cms-presets",
+      presetsRepo: settings.presetsRepo || "davidvkimball/vaultcms-presets",
       enableEditingToolbar: (_b = (_a = settings.enableEditingToolbar) != null ? _a : settings.enableWYSIWYG) != null ? _b : false,
       enableMdxSupport: settings.enableMdxSupport,
       enableExtendedFileTypes: settings.enableExtendedFileTypes,
@@ -963,7 +963,7 @@ var WizardStateManager = class {
     }
     this.state.preset = settings.preset || "vanilla";
     this.state.presetName = settings.presetName || "";
-    this.state.presetsRepo = settings.presetsRepo || "vaultcms/vault-cms-presets";
+    this.state.presetsRepo = settings.presetsRepo || "davidvkimball/vaultcms-presets";
     const actualVisibility = await this.editingToolbarConfigurator.getVisibility(this.plugin.app);
     if (actualVisibility !== void 0) {
       this.state.enableEditingToolbar = actualVisibility;
@@ -1053,7 +1053,7 @@ var WizardStateManager = class {
     settings.attachmentFolderName = this.state.attachmentFolderName;
     settings.preset = this.state.preset;
     settings.presetName = this.state.presetName || "";
-    settings.presetsRepo = this.state.presetsRepo || "davidvkimball/vault-cms-presets";
+    settings.presetsRepo = this.state.presetsRepo || "davidvkimball/vaultcms-presets";
     settings.enableEditingToolbar = this.state.enableEditingToolbar;
     if (settings.enableWYSIWYG !== void 0) {
       delete settings.enableWYSIWYG;
