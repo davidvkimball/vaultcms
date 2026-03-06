@@ -4,11 +4,9 @@ if you want to view the source, please visit the github repository of this plugi
 */
 
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -22,14 +20,6 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/main.ts
@@ -38,7 +28,7 @@ __export(main_exports, {
   default: () => DisableTabsPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian3 = require("obsidian");
+var import_obsidian2 = require("obsidian");
 
 // src/settings.ts
 var DEFAULT_SETTINGS = {
@@ -78,42 +68,8 @@ var TabEnforcer = class {
 };
 
 // src/ui/settings-tab.ts
-var import_obsidian2 = require("obsidian");
-
-// src/utils/settings-compat.ts
 var import_obsidian = require("obsidian");
-var ObsidianModule = __toESM(require("obsidian"), 1);
-function createSettingsGroup(containerEl, heading, manifestId) {
-  if ((0, import_obsidian.requireApiVersion)("1.11.0")) {
-    const SettingGroupClass = ObsidianModule.SettingGroup;
-    if (SettingGroupClass) {
-      const group = heading ? new SettingGroupClass(containerEl).setHeading(heading) : new SettingGroupClass(containerEl);
-      return {
-        addSetting(cb) {
-          group.addSetting(cb);
-        }
-      };
-    }
-  }
-  if (manifestId) {
-    containerEl.addClass(`${manifestId}-settings-compat`);
-  }
-  {
-    if (heading) {
-      const headingEl = containerEl.createDiv("setting-group-heading");
-      headingEl.createEl("h3", { text: heading });
-    }
-    return {
-      addSetting(cb) {
-        const setting = new import_obsidian.Setting(containerEl);
-        cb(setting);
-      }
-    };
-  }
-}
-
-// src/ui/settings-tab.ts
-var DisableTabsSettingTab = class extends import_obsidian2.PluginSettingTab {
+var DisableTabsSettingTab = class extends import_obsidian.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -122,7 +78,7 @@ var DisableTabsSettingTab = class extends import_obsidian2.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    const generalGroup = createSettingsGroup(containerEl, void 0, "disable-tabs");
+    const generalGroup = new import_obsidian.SettingGroup(containerEl);
     generalGroup.addSetting((setting) => {
       setting.setName("Hide mobile tabs icon").setDesc("Hide the tabs icon on mobile devices").addToggle(
         (toggle) => toggle.setValue(this.settings.hideMobileNewTabIcon).onChange(async (value) => {
@@ -136,7 +92,7 @@ var DisableTabsSettingTab = class extends import_obsidian2.PluginSettingTab {
 };
 
 // src/main.ts
-var DisableTabsPlugin = class extends import_obsidian3.Plugin {
+var DisableTabsPlugin = class extends import_obsidian2.Plugin {
   async onload() {
     const loadedData = await this.loadData();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
@@ -164,6 +120,4 @@ var DisableTabsPlugin = class extends import_obsidian3.Plugin {
     document.body.classList.remove("disable-tabs-hide-mobile-icon");
   }
 };
-
-
-/* nosourcemap */
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsic3JjL21haW4udHMiLCAic3JjL3NldHRpbmdzLnRzIiwgInNyYy91dGlscy90YWItZW5mb3JjZXIudHMiLCAic3JjL3VpL3NldHRpbmdzLXRhYi50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsiaW1wb3J0IHsgUGx1Z2luIH0gZnJvbSBcIm9ic2lkaWFuXCI7XG5pbXBvcnQgeyBEaXNhYmxlVGFic1NldHRpbmdzLCBERUZBVUxUX1NFVFRJTkdTIH0gZnJvbSBcIi4vc2V0dGluZ3NcIjtcbmltcG9ydCB7IFRhYkVuZm9yY2VyIH0gZnJvbSBcIi4vdXRpbHMvdGFiLWVuZm9yY2VyXCI7XG5pbXBvcnQgeyBEaXNhYmxlVGFic1NldHRpbmdUYWIgfSBmcm9tIFwiLi91aS9zZXR0aW5ncy10YWJcIjtcblxuZXhwb3J0IGRlZmF1bHQgY2xhc3MgRGlzYWJsZVRhYnNQbHVnaW4gZXh0ZW5kcyBQbHVnaW4ge1xuICBzZXR0aW5ncyE6IERpc2FibGVUYWJzU2V0dGluZ3M7XG4gIHByaXZhdGUgdGFiRW5mb3JjZXIhOiBUYWJFbmZvcmNlcjtcblxuICBhc3luYyBvbmxvYWQoKSB7XG4gICAgLy8gTG9hZCBzZXR0aW5nc1xuICAgIGNvbnN0IGxvYWRlZERhdGEgPSBhd2FpdCB0aGlzLmxvYWREYXRhKCkgYXMgUGFydGlhbDxEaXNhYmxlVGFic1NldHRpbmdzPiB8IG51bGw7XG4gICAgdGhpcy5zZXR0aW5ncyA9IE9iamVjdC5hc3NpZ24oe30sIERFRkFVTFRfU0VUVElOR1MsIGxvYWRlZERhdGEpO1xuICAgIFxuICAgIC8vIEluaXRpYWxpemUgdGFiIGVuZm9yY2VyXG4gICAgdGhpcy50YWJFbmZvcmNlciA9IG5ldyBUYWJFbmZvcmNlcih0aGlzLmFwcCk7XG5cbiAgICAvLyBBcHBseSBtb2JpbGUgdGFiIGljb24gQ1NTIGlmIGVuYWJsZWRcbiAgICB0aGlzLnVwZGF0ZU1vYmlsZVRhYkljb25DU1MoKTtcblxuICAgIC8vIEhvb2sgaW50byB0aGUgd29ya3NwYWNlIHRvIGVuZm9yY2Ugc2luZ2xlIHRhYiBvbiBsYXlvdXQgY2hhbmdlc1xuICAgIHRoaXMucmVnaXN0ZXJFdmVudCh0aGlzLmFwcC53b3Jrc3BhY2Uub24oXCJsYXlvdXQtY2hhbmdlXCIsICgpID0+IHtcbiAgICAgIHRoaXMudGFiRW5mb3JjZXIuZW5mb3JjZVNpbmdsZVRhYigpO1xuICAgIH0pKTtcblxuICAgIC8vIEFsc28gZW5mb3JjZSBvbiBpbml0aWFsIGxheW91dCByZWFkeVxuICAgIHRoaXMuYXBwLndvcmtzcGFjZS5vbkxheW91dFJlYWR5KCgpID0+IHtcbiAgICAgIHRoaXMudGFiRW5mb3JjZXIuZW5mb3JjZVNpbmdsZVRhYigpO1xuICAgIH0pO1xuXG4gICAgLy8gUmVnaXN0ZXIgc2V0dGluZ3MgdGFiXG4gICAgdGhpcy5hZGRTZXR0aW5nVGFiKG5ldyBEaXNhYmxlVGFic1NldHRpbmdUYWIodGhpcy5hcHAsIHRoaXMpKTtcbiAgfVxuXG4gIHVwZGF0ZU1vYmlsZVRhYkljb25DU1MoKTogdm9pZCB7XG4gICAgLy8gVG9nZ2xlIENTUyBjbGFzcyBvbiBib2R5IGVsZW1lbnQgYmFzZWQgb24gc2V0dGluZ1xuICAgIGlmICh0aGlzLnNldHRpbmdzLmhpZGVNb2JpbGVOZXdUYWJJY29uKSB7XG4gICAgICBkb2N1bWVudC5ib2R5LmNsYXNzTGlzdC5hZGQoXCJkaXNhYmxlLXRhYnMtaGlkZS1tb2JpbGUtaWNvblwiKTtcbiAgICB9IGVsc2Uge1xuICAgICAgZG9jdW1lbnQuYm9keS5jbGFzc0xpc3QucmVtb3ZlKFwiZGlzYWJsZS10YWJzLWhpZGUtbW9iaWxlLWljb25cIik7XG4gICAgfVxuICB9XG5cbiAgYXN5bmMgc2F2ZVNldHRpbmdzKCkge1xuICAgIGF3YWl0IHRoaXMuc2F2ZURhdGEodGhpcy5zZXR0aW5ncyk7XG4gIH1cblxuICBvbnVubG9hZCgpOiB2b2lkIHtcbiAgICAvLyBDbGVhbiB1cCBDU1MgY2xhc3NcbiAgICBkb2N1bWVudC5ib2R5LmNsYXNzTGlzdC5yZW1vdmUoXCJkaXNhYmxlLXRhYnMtaGlkZS1tb2JpbGUtaWNvblwiKTtcbiAgfVxufVxuIiwgImV4cG9ydCBpbnRlcmZhY2UgRGlzYWJsZVRhYnNTZXR0aW5ncyB7XG4gIGVuYWJsZWQ6IGJvb2xlYW47XG4gIGhpZGVNb2JpbGVOZXdUYWJJY29uOiBib29sZWFuO1xufVxuXG5leHBvcnQgY29uc3QgREVGQVVMVF9TRVRUSU5HUzogRGlzYWJsZVRhYnNTZXR0aW5ncyA9IHtcbiAgZW5hYmxlZDogdHJ1ZSxcbiAgaGlkZU1vYmlsZU5ld1RhYkljb246IGZhbHNlLFxufTtcbiIsICJpbXBvcnQgeyBBcHAsIFdvcmtzcGFjZUxlYWYgfSBmcm9tIFwib2JzaWRpYW5cIjtcblxuZXhwb3J0IGNsYXNzIFRhYkVuZm9yY2VyIHtcbiAgcHJpdmF0ZSBhcHA6IEFwcDtcblxuICBjb25zdHJ1Y3RvcihhcHA6IEFwcCkge1xuICAgIHRoaXMuYXBwID0gYXBwO1xuICB9XG5cbiAgZW5mb3JjZVNpbmdsZVRhYigpOiB2b2lkIHtcbiAgICBjb25zdCBsZWF2ZXM6IFdvcmtzcGFjZUxlYWZbXSA9IFtdO1xuICAgIHRoaXMuYXBwLndvcmtzcGFjZS5pdGVyYXRlUm9vdExlYXZlcyhsZWFmID0+IHtcbiAgICAgIGxlYXZlcy5wdXNoKGxlYWYpO1xuICAgIH0pO1xuXG4gICAgaWYgKGxlYXZlcy5sZW5ndGggPiAxKSB7XG4gICAgICAvLyBGaW5kIHRoZSBhY3RpdmUgbGVhZiAodGhlIG9uZSB0aGF0IGp1c3Qgb3BlbmVkIG9yIGlzIGN1cnJlbnRseSBhY3RpdmUpXG4gICAgICAvLyBQcmVmZXIgdGhlIGxhc3QgbGVhZiBhcyBpdCdzIG1vc3QgbGlrZWx5IHRoZSBuZXdseSBvcGVuZWQgb25lXG4gICAgICBsZXQgYWN0aXZlOiBXb3Jrc3BhY2VMZWFmIHwgbnVsbCA9IGxlYXZlc1tsZWF2ZXMubGVuZ3RoIC0gMV07XG4gICAgICBcbiAgICAgIC8vIFZlcmlmeSBpdCdzIGFjdHVhbGx5IGFjdGl2ZSBieSBjaGVja2luZyBmb3IgdGhlIGlzLWFjdGl2ZSBjbGFzc1xuICAgICAgZm9yIChjb25zdCBsZWFmIG9mIGxlYXZlcykge1xuICAgICAgICBjb25zdCB2aWV3ID0gbGVhZi52aWV3O1xuICAgICAgICBpZiAodmlldyAmJiAnY29udGFpbmVyRWwnIGluIHZpZXcpIHtcbiAgICAgICAgICBjb25zdCBjb250YWluZXJFbCA9ICh2aWV3IGFzIHsgY29udGFpbmVyRWw6IEhUTUxFbGVtZW50IH0pLmNvbnRhaW5lckVsO1xuICAgICAgICAgIGlmIChjb250YWluZXJFbCAmJiBjb250YWluZXJFbC5oYXNDbGFzcygnaXMtYWN0aXZlJykpIHtcbiAgICAgICAgICAgIGFjdGl2ZSA9IGxlYWY7XG4gICAgICAgICAgICBicmVhaztcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH1cblxuICAgICAgLy8gQ2xvc2UgYWxsIG90aGVyIHRhYnMgdG8gcmVwbGFjZSB0aGUgY3VycmVudCB0YWIgc21vb3RobHlcbiAgICAgIGxlYXZlcy5mb3JFYWNoKGxlYWYgPT4ge1xuICAgICAgICBpZiAobGVhZiAhPT0gYWN0aXZlKSB7XG4gICAgICAgICAgbGVhZi5kZXRhY2goKTtcbiAgICAgICAgfVxuICAgICAgfSk7XG4gICAgfVxuICB9XG59XG4iLCAiaW1wb3J0IHsgQXBwLCBQbHVnaW5TZXR0aW5nVGFiICwgU2V0dGluZ0dyb3VwfSBmcm9tIFwib2JzaWRpYW5cIjtcclxuaW1wb3J0IERpc2FibGVUYWJzUGx1Z2luIGZyb20gXCIuLi9tYWluXCI7XHJcbmltcG9ydCB7IERpc2FibGVUYWJzU2V0dGluZ3MgfSBmcm9tIFwiLi4vc2V0dGluZ3NcIjtcclxuXHJcblxyXG5leHBvcnQgY2xhc3MgRGlzYWJsZVRhYnNTZXR0aW5nVGFiIGV4dGVuZHMgUGx1Z2luU2V0dGluZ1RhYiB7XHJcbiAgcGx1Z2luOiBEaXNhYmxlVGFic1BsdWdpbjtcclxuICBzZXR0aW5nczogRGlzYWJsZVRhYnNTZXR0aW5ncztcclxuXHJcbiAgY29uc3RydWN0b3IoYXBwOiBBcHAsIHBsdWdpbjogRGlzYWJsZVRhYnNQbHVnaW4pIHtcclxuICAgIHN1cGVyKGFwcCwgcGx1Z2luKTtcclxuICAgIHRoaXMucGx1Z2luID0gcGx1Z2luO1xyXG4gICAgdGhpcy5zZXR0aW5ncyA9IHBsdWdpbi5zZXR0aW5ncztcclxuICB9XHJcblxyXG4gIGRpc3BsYXkoKTogdm9pZCB7XHJcbiAgICBjb25zdCB7IGNvbnRhaW5lckVsIH0gPSB0aGlzO1xyXG5cclxuICAgIGNvbnRhaW5lckVsLmVtcHR5KCk7XHJcblxyXG4gICAgLy8gRmlyc3QgZ3JvdXAgKG5vIGhlYWRpbmcpXHJcbiAgICBjb25zdCBnZW5lcmFsR3JvdXAgPSBuZXcgU2V0dGluZ0dyb3VwKGNvbnRhaW5lckVsKTtcclxuICAgIGdlbmVyYWxHcm91cC5hZGRTZXR0aW5nKHNldHRpbmcgPT4ge1xyXG4gICAgICBzZXR0aW5nXHJcbiAgICAgICAgLnNldE5hbWUoXCJIaWRlIG1vYmlsZSB0YWJzIGljb25cIilcclxuICAgICAgICAuc2V0RGVzYyhcIkhpZGUgdGhlIHRhYnMgaWNvbiBvbiBtb2JpbGUgZGV2aWNlc1wiKVxyXG4gICAgICAgIC5hZGRUb2dnbGUodG9nZ2xlID0+XHJcbiAgICAgICAgICB0b2dnbGVcclxuICAgICAgICAgICAgLnNldFZhbHVlKHRoaXMuc2V0dGluZ3MuaGlkZU1vYmlsZU5ld1RhYkljb24pXHJcbiAgICAgICAgICAgIC5vbkNoYW5nZShhc3luYyB2YWx1ZSA9PiB7XHJcbiAgICAgICAgICAgICAgdGhpcy5zZXR0aW5ncy5oaWRlTW9iaWxlTmV3VGFiSWNvbiA9IHZhbHVlO1xyXG4gICAgICAgICAgICAgIGF3YWl0IHRoaXMucGx1Z2luLnNhdmVTZXR0aW5ncygpO1xyXG4gICAgICAgICAgICAgIHRoaXMucGx1Z2luLnVwZGF0ZU1vYmlsZVRhYkljb25DU1MoKTtcclxuICAgICAgICAgICAgfSlcclxuICAgICAgICApO1xyXG4gICAgfSk7XHJcbiAgfVxyXG59XHJcblxyXG4iXSwKICAibWFwcGluZ3MiOiAi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

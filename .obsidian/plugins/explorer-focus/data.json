@@ -1,7 +1,7 @@
 {
   "showRightClickMenu": true,
   "showFileExplorerIcon": true,
-  "focusLevel": "parent",
-  "customFolderPath": "",
+  "focusLevel": "custom",
+  "customFolderPath": "src/content",
   "hideAncestorFolders": false
 }

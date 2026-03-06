@@ -53,21 +53,101 @@ program
         }
       }
 
+      // Smart default: root (.) for non-preset, src/content for preset
+      const defaultInstallPath = template ? 'src/content' : '.';
+
       if (!targetPath) {
+        // When no target specified, detect from cwd for the interactive prompt
+        const cwd = process.cwd();
+        const detectionBase = path.resolve(cwd);
+        const projectRoot = await findProjectRoot(detectionBase);
+        const isAstroProject = await isAstroProjectDir(projectRoot);
+        const detectedRoutes = isAstroProject ? await detectAstroRoutes(projectRoot) : [];
+
+        if (isAstroProject && !template) {
+          console.log(`\n📂 Detected Astro project at ${projectRoot}`);
+
+          // Show detected content collections
+          const contentDir = path.join(projectRoot, 'src', 'content');
+          if (await fs.pathExists(contentDir)) {
+            const collections = (await fs.readdir(contentDir))
+              .filter(item => {
+                try {
+                  return fs.statSync(path.join(contentDir, item)).isDirectory();
+                } catch { return false; }
+              });
+            if (collections.length > 0) {
+              console.log(`   Found content collections: ${collections.join(', ')}`);
+            }
+          }
+
+          // Show detected routes
+          if (detectedRoutes.length > 0) {
+            console.log('\n📍 Route detection:');
+            for (const route of detectedRoutes) {
+              console.log(`   ${route.collection.padEnd(12)} →  ${route.urlPrefix.padEnd(10)} (from ${route.sourceFile})`);
+            }
+          }
+
+          console.log('\n📂 Installing at project root (.) ensures all images and assets');
+          console.log('   display correctly in Obsidian.\n');
+        }
+
         const answers = await inquirer.prompt([
           {
             type: 'input',
             name: 'path',
             message: 'Where should we install Vault CMS? (use . for current folder)',
-            default: 'src/content',
+            default: defaultInstallPath,
           }
         ]);
         targetPath = answers.path;
       }
 
+      // For presets: if user provided a project root as target, install into src/content
+      if (template && target && targetPath === target) {
+        const resolvedTarget = path.resolve(targetPath);
+        const isProject = await isAstroProjectDir(resolvedTarget) ||
+          await fs.pathExists(path.join(resolvedTarget, 'package.json'));
+        if (isProject) {
+          targetPath = path.join(targetPath, 'src', 'content');
+          console.log(`\n📦 Preset selected — installing into ${path.relative(process.cwd(), path.resolve(targetPath)) || targetPath}`);
+        }
+      }
+
       const targetDir = path.resolve(targetPath);
       const tempZip = path.join(targetDir, 'vaultcms-temp.zip');
       const extractDir = path.join(targetDir, '.vaultcms-temp-extract');
+
+      // Detect project from the actual resolved target directory
+      const resolvedProjectRoot = await findProjectRoot(targetDir);
+      const targetIsAstroProject = await isAstroProjectDir(resolvedProjectRoot);
+
+      // Show route detection if target was provided as argument (skipped the prompt)
+      if (target && targetIsAstroProject && !template) {
+        const detectedRoutes = await detectAstroRoutes(resolvedProjectRoot);
+        console.log(`\n📂 Detected Astro project at ${resolvedProjectRoot}`);
+
+        const contentDir = path.join(resolvedProjectRoot, 'src', 'content');
+        if (await fs.pathExists(contentDir)) {
+          const collections = (await fs.readdir(contentDir))
+            .filter(item => {
+              try {
+                return fs.statSync(path.join(contentDir, item)).isDirectory();
+              } catch { return false; }
+            });
+          if (collections.length > 0) {
+            console.log(`   Found content collections: ${collections.join(', ')}`);
+          }
+        }
+
+        if (detectedRoutes.length > 0) {
+          console.log('\n📍 Route detection:');
+          for (const route of detectedRoutes) {
+            console.log(`   ${route.collection.padEnd(12)} →  ${route.urlPrefix.padEnd(10)} (from ${route.sourceFile})`);
+          }
+        }
+      }
 
       const repoName = template ? 'vaultcms-presets' : 'vaultcms';
       const zipUrl = `https://github.com/davidvkimball/${repoName}/archive/refs/heads/master.zip`;
@@ -109,12 +189,47 @@ program
         }
       }
 
+      // For preset installs: fetch _GUIDE.md from main repo if preset didn't include it
+      if (template && !(await fs.pathExists(path.join(targetDir, '_GUIDE.md')))) {
+        try {
+          const mainZipUrl = 'https://github.com/davidvkimball/vaultcms/archive/refs/heads/master.zip';
+          const mainTempZip = path.join(targetDir, 'vaultcms-main-temp.zip');
+          const mainExtractDir = path.join(targetDir, '.vaultcms-main-temp-extract');
+
+          await downloadFile(mainZipUrl, mainTempZip);
+          const mainZip = new AdmZip(mainTempZip);
+          mainZip.extractAllTo(mainExtractDir, true);
+
+          const mainItems = await fs.readdir(mainExtractDir);
+          const mainFolders = mainItems.filter(item => fs.statSync(path.join(mainExtractDir, item)).isDirectory());
+
+          if (mainFolders.length > 0) {
+            const mainInner = path.join(mainExtractDir, mainFolders[0]);
+            const guideSrc = path.join(mainInner, '_GUIDE.md');
+            if (await fs.pathExists(guideSrc)) {
+              await fs.copy(guideSrc, path.join(targetDir, '_GUIDE.md'), { overwrite: true });
+              console.log('  ✓ Added _GUIDE.md (from main repo)');
+            }
+          }
+
+          await fs.remove(mainTempZip);
+          await fs.remove(mainExtractDir);
+        } catch (error) {
+          console.warn(`  ⚠️  Could not fetch _GUIDE.md from main repo: ${error.message}`);
+        }
+      }
+
+      // Determine if this is a root install (vault at project root)
+      const isRootInstall = path.resolve(targetDir) === path.resolve(resolvedProjectRoot);
+
+      // Post-install: adjust configs based on install location
+      await adjustConfigs(targetDir, isRootInstall);
+
       // Smart .gitignore logic: Look for project root
-      const projectRoot = await findProjectRoot(targetDir);
-      const gitignorePath = path.join(projectRoot, '.gitignore');
+      const gitignorePath = path.join(resolvedProjectRoot, '.gitignore');
       const ignores = '\n# Vault CMS / Obsidian\n.obsidian/workspace.json\n.obsidian/workspace-mobile.json\n.ref/\n';
 
-      const isExternalRoot = projectRoot !== targetDir && !targetDir.startsWith(projectRoot);
+      const isExternalRoot = resolvedProjectRoot !== targetDir && !targetDir.startsWith(resolvedProjectRoot);
 
       if (await fs.pathExists(gitignorePath)) {
         const content = await fs.readFile(gitignorePath, 'utf8');
@@ -132,8 +247,8 @@ program
       await fs.remove(tempZip);
       await fs.remove(extractDir);
 
-      if (projectRoot === targetDir) {
-        console.log('\n  ⚠️  Note: No Astro project or package.json found in parent directories.');
+      if (!targetIsAstroProject) {
+        console.log('\n  ⚠️  Note: No Astro project found at or above the target directory.');
         console.log('     Installation completed, but you may need to move these files into your content folder manually.');
       }
 
@@ -179,6 +294,7 @@ async function openInObsidian(targetPath) {
     });
   });
 }
+
 async function findProjectRoot(startDir) {
   let current = startDir;
   // Look up to 6 levels up for a project root (Astro config, package.json, or .git)
@@ -194,6 +310,220 @@ async function findProjectRoot(startDir) {
     depth++;
   }
   return startDir; // Fallback to target dir
+}
+
+/**
+ * Check if a directory is an Astro project root by looking for config files.
+ */
+async function isAstroProjectDir(dir) {
+  const astroConfigNames = [
+    'astro.config.mjs', 'astro.config.ts', 'astro.config.js',
+    'astro.config.mts', 'astro.config.cjs'
+  ];
+  for (const name of astroConfigNames) {
+    if (await fs.pathExists(path.join(dir, name))) return true;
+  }
+  return false;
+}
+
+/**
+ * Scan src/pages/ for dynamic route files ([...slug].astro, [slug].astro)
+ * and map them to content collection URL prefixes.
+ */
+async function detectAstroRoutes(projectRoot) {
+  const pagesDir = path.join(projectRoot, 'src', 'pages');
+  const contentDir = path.join(projectRoot, 'src', 'content');
+  const routes = [];
+
+  if (!(await fs.pathExists(pagesDir))) return routes;
+
+  // Get content collection names for cross-referencing
+  let collections = [];
+  if (await fs.pathExists(contentDir)) {
+    collections = (await fs.readdir(contentDir))
+      .filter(item => {
+        try {
+          return fs.statSync(path.join(contentDir, item)).isDirectory();
+        } catch { return false; }
+      });
+  }
+
+  // Recursively scan src/pages/ for dynamic route files
+  await scanPagesDir(pagesDir, pagesDir, collections, routes);
+
+  return routes;
+}
+
+/**
+ * Recursively scan a directory within src/pages/ for dynamic route files.
+ */
+async function scanPagesDir(dir, pagesRoot, collections, routes) {
+  const items = await fs.readdir(dir);
+
+  for (const item of items) {
+    const fullPath = path.join(dir, item);
+    const stat = await fs.stat(fullPath);
+
+    if (stat.isDirectory()) {
+      // Recurse into subdirectories (skip dynamic dirs like [slug])
+      if (!item.startsWith('[')) {
+        await scanPagesDir(fullPath, pagesRoot, collections, routes);
+      }
+    } else if (item.match(/^\[\.\.\..*\]\.(astro|ts|js)$/) || item.match(/^\[.*\]\.(astro|ts|js)$/)) {
+      // Found a dynamic route file like [...slug].astro or [slug].astro
+      const relativeDirPath = path.relative(pagesRoot, dir);
+      const urlPrefix = relativeDirPath === '' ? '/' : `/${relativeDirPath.replace(/\\/g, '/')}/`;
+      const relativeFilePath = path.relative(pagesRoot, fullPath).replace(/\\/g, '/');
+
+      // Try to match this route to a content collection
+      // The directory name often matches the collection name
+      const dirName = path.basename(dir);
+      const matchedCollection = dirName === path.basename(pagesRoot)
+        ? null // Top-level catch-all, could match multiple collections
+        : collections.find(c => c.toLowerCase() === dirName.toLowerCase());
+
+      if (matchedCollection) {
+        routes.push({
+          collection: matchedCollection,
+          urlPrefix: urlPrefix,
+          sourceFile: `src/pages/${relativeFilePath}`
+        });
+      } else if (relativeDirPath === '') {
+        // Top-level catch-all — try to find collections that don't have dedicated routes
+        // Common pattern: pages collection renders at root
+        const routedCollections = routes.map(r => r.collection);
+        const unroutedCollections = collections.filter(c => !routedCollections.includes(c));
+
+        // "pages" collection at root is the most common pattern
+        const pagesCollection = unroutedCollections.find(c => c.toLowerCase() === 'pages');
+        if (pagesCollection) {
+          routes.push({
+            collection: pagesCollection,
+            urlPrefix: '/',
+            sourceFile: `src/pages/${relativeFilePath}`
+          });
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Post-install: adjust configs based on whether this is a root install or subfolder install.
+ */
+async function adjustConfigs(targetDir, isRootInstall) {
+  if (isRootInstall) {
+    console.log('  🔧 Adjusting configs for project root install...');
+
+    // 1. Update Home.base formulas to use src/content/ prefixed paths
+    await adjustHomeBase(targetDir);
+
+    // 2. Update app.json for root install
+    await adjustAppJson(targetDir);
+
+    // 3. Set Explorer Focus to custom with src/content
+    await adjustExplorerFocus(targetDir, {
+      showRightClickMenu: true,
+      showFileExplorerIcon: true,
+      focusLevel: 'custom',
+      customFolderPath: 'src/content',
+      hideAncestorFolders: false
+    });
+
+    console.log('  ✓ Configured for project root install');
+  } else {
+    // Non-root install: reset Explorer Focus to default (parent mode)
+    await adjustExplorerFocus(targetDir, {
+      showRightClickMenu: true,
+      showFileExplorerIcon: true,
+      focusLevel: 'parent',
+      hideAncestorFolders: false
+    });
+  }
+}
+
+/**
+ * Update Home.base formulas for root-relative paths.
+ * Changes folder references from "posts" to "src/content/posts" etc.
+ */
+async function adjustHomeBase(targetDir) {
+  const homeBasePath = path.join(targetDir, '_bases', 'Home.base');
+  if (!(await fs.pathExists(homeBasePath))) return;
+
+  try {
+    let content = await fs.readFile(homeBasePath, 'utf8');
+
+    // Update the global filter to scope to src/content
+    content = content.replace(
+      /file\.ext == "md"/g,
+      'file.ext == "md" && file.folder.startsWith("src/content")'
+    );
+
+    // Update folder references in formulas: "posts" -> "src/content/posts", etc.
+    const folderNames = ['posts', 'pages', 'special', 'projects', 'docs'];
+    for (const folder of folderNames) {
+      // Match file.folder == "folder" pattern (with both quote styles)
+      const pattern = new RegExp(`file\\.folder == "${folder}"`, 'g');
+      content = content.replace(pattern, `file.folder == "src/content/${folder}"`);
+    }
+
+    // Update the view filter for root folder scope
+    content = content.replace(
+      /file\.folder == "\/"/g,
+      'file.folder == ""'
+    );
+
+    await fs.writeFile(homeBasePath, content, 'utf8');
+  } catch (error) {
+    console.warn(`  ⚠️  Could not adjust Home.base: ${error.message}`);
+  }
+}
+
+/**
+ * Update app.json for root install.
+ */
+async function adjustAppJson(targetDir) {
+  const appJsonPath = path.join(targetDir, '.obsidian', 'app.json');
+  if (!(await fs.pathExists(appJsonPath))) return;
+
+  try {
+    const appJson = JSON.parse(await fs.readFile(appJsonPath, 'utf8'));
+
+    // Point new file creation to src/content
+    appJson.newFileFolderPath = 'src/content';
+
+    // Point attachments to src/content/attachments
+    appJson.attachmentFolderPath = 'src/content/attachments';
+
+    await fs.writeFile(appJsonPath, JSON.stringify(appJson, null, 2) + '\n', 'utf8');
+  } catch (error) {
+    console.warn(`  ⚠️  Could not adjust app.json: ${error.message}`);
+  }
+}
+
+/**
+ * Update Explorer Focus data.json config.
+ */
+async function adjustExplorerFocus(targetDir, config) {
+  const dataJsonPath = path.join(targetDir, '.obsidian', 'plugins', 'explorer-focus', 'data.json');
+
+  try {
+    await fs.ensureDir(path.dirname(dataJsonPath));
+
+    let existingData = {};
+    if (await fs.pathExists(dataJsonPath)) {
+      try {
+        existingData = JSON.parse(await fs.readFile(dataJsonPath, 'utf8'));
+      } catch {
+        // Start fresh if parse fails
+      }
+    }
+
+    const mergedData = { ...existingData, ...config };
+    await fs.writeFile(dataJsonPath, JSON.stringify(mergedData, null, 2) + '\n', 'utf8');
+  } catch (error) {
+    console.warn(`  ⚠️  Could not adjust Explorer Focus config: ${error.message}`);
+  }
 }
 
 function downloadFile(url, dest) {

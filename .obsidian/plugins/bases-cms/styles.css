@@ -454,9 +454,24 @@ settings:
 	background-color: var(--bases-cms-view-background, transparent);
 }
 
-/* Match native Bases cards view padding (single source: .bases-view) */
+/* Inner wrapper: top padding for selection ring; horizontal padding to match native Bases view spacing */
+.bases-cms-scroll-content {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 100%;
+	padding: 8px var(--bases-view-padding, var(--size-4-3, 12px)) 0 var(--bases-view-padding, var(--size-4-3, 12px));
+}
+
+/* Gap so the top row’s selection ring isn’t covered by the bulk toolbar */
+.bases-cms-bulk-toolbar + .bases-cms-container {
+	margin-top: 4px;
+}
+
+/* Override Bases .bases-view: no padding on view so scrollbar stays at edge; padding lives on scroll-content instead */
 .bases-view[data-view-type="cms"] {
 	--bases-view-padding: var(--size-4-3);
+	padding: 0;
+	scrollbar-gutter: auto;
 	--bases-embed-padding: var(--size-4-1) 1px;
 }
 
@@ -471,14 +486,14 @@ settings:
 	grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width, 300px), 1fr));
 }
 
-/* Ensure no extra padding in embedded view containers */
-.markdown-rendered .bases-view,
+/* Ensure no extra padding in embedded CMS view only (do not affect titles/cards views) */
+.markdown-rendered .bases-view[data-view-type="cms"],
 .markdown-rendered .bases-cms-container {
 	padding-right: 0 !important;
 }
 
-/* Remove reserved scrollbar gutter in embed so cards fill width (Bases may set scrollbar-gutter: stable on .bases-view) */
-.markdown-rendered .bases-view {
+/* Remove reserved scrollbar gutter in embedded CMS view only */
+.markdown-rendered .bases-view[data-view-type="cms"] {
 	scrollbar-gutter: auto;
 }
 
@@ -575,6 +590,7 @@ body.bases-cms-card-background-custom .bases-cms .card {
 }
 
 .bases-cms .card.selected {
+	z-index: 1;
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 2px var(--interactive-accent);
 }
@@ -1151,6 +1167,14 @@ body.bases-cms-property-color-custom .bases-cms .property-content {
 	overflow-wrap: break-word;
 }
 
+/* Constrain property value width so long strings (e.g. URLs) don't blow card size */
+.bases-cms .card .property-content .text-wrapper {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /* Tags */
 .bases-cms .tags-wrapper {
 	display: flex;
@@ -1200,6 +1224,9 @@ body.bases-cms-property-color-custom .bases-cms .property-content {
 	line-height: 1;
 	white-space: nowrap;
 	display: inline-block;
+	max-width: 180px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .bases-cms .card-tag:hover {
@@ -1270,12 +1297,13 @@ body.bases-cms-property-color-custom .bases-cms .property-content {
 	justify-content: space-between;
 	gap: 1rem;
 	width: 100%;
-	height: 44px;
-	min-height: 44px;
+	height: 41px;
+	min-height: 41px;
 	background-color: var(--background-primary);
 	z-index: 15;
 	padding-left: var(--bases-header-padding-start, var(--size-4-2));
 	padding-right: var(--bases-header-padding-end, var(--size-4-2));
+	padding-bottom: 0;
 	margin: 0;
 	box-sizing: border-box;
 	overflow: hidden;
@@ -1527,13 +1555,16 @@ body.bases-cms-property-color-custom .bases-cms .property-content {
 	border-left: 3px solid var(--interactive-accent);
 }
 
-/* Group settings compatibility styling for older Obsidian builds (< 1.11.0) */
+
 /* Scoped to only this plugin's settings container to avoid affecting other plugins */
-.bases-cms-settings-compat .setting-group-heading h3 {
-	margin: 0 0 0.75rem;
-	padding-bottom: 0.5rem;
-	padding-top: 0.5rem;
-	font-size: 1rem;
-	font-weight: 600;
-	border-bottom: none !important;
+
+
+/* Titles view: list only */
+.bases-titles-view {
+	min-height: 0;
+}
+
+/* Hide until first render to avoid empty-state flash (embedded bases) */
+.bases-titles-view.bases-titles-loading {
+	opacity: 0;
 }

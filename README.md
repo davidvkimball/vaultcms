@@ -6,7 +6,7 @@ The open-source headless content management system that turns [Obsidian](https:/
 
 ## Features 
 
-- **Auto-detection and automation**: Understands your content structure and lets you focus on writing.
+- **Auto-detection and automation**: Detects your Astro routes and content structure automatically.
 - **CMS-like homepage**: See your content in a visual grid and perform bulk actions.
 - **Preconfigured**: Optimized settings, hotkeys, and plugins for the Astro workflow.
 - **Headless and flexible**: Just Markdown files and a workspace ready to be customized by you.
@@ -20,16 +20,16 @@ The fastest way to install Vault CMS into your Astro project is via the CLI at y
 pnpm create vaultcms
 ```
 
-*Follow the prompts to install into `src/content` or your desired sub-directory.*
+*The installer will detect your Astro project, scan your routes, and install at the project root by default for full asset compatibility.*
 
 ### Manual Installation
 
 If you prefer to install manually, you can download the latest version of Vault CMS and place it directly into your Astro project.
 
 1. **Download the source**: [Clone this repository](https://github.com/davidvkimball/vaultcms) or [download the ZIP archive](https://github.com/davidvkimball/vaultcms/archive/refs/heads/master.zip).
-2. **Locate your content directory**: In most Astro projects, this is `src/content`.
-3. **Move the files**: Copy the `.obsidian` and `_bases` folders (and `_GUIDE.md`) from the Vault CMS source into your content directory.
-4. **Open in Obsidian**: Open the content directory as a new vault in Obsidian.
+2. **Locate your project root**: This is typically the directory containing `astro.config.mjs` and `package.json`.
+3. **Move the files**: Copy the `.obsidian` and `_bases` folders (and `_GUIDE.md`) from the Vault CMS source into your project root.
+4. **Open in Obsidian**: Open the project root as a new vault in Obsidian.
 
 ### Presets
 
