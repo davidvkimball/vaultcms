@@ -401,8 +401,9 @@ async function scanPagesDir(dir, pagesRoot, collections, routes) {
 }
 
 /**
- * Fix absolute paths in preset's vault-cms data.json after install.
- * Replaces hardcoded projectRoot and configFilePath with the actual target paths.
+ * Fix paths in preset's vault-cms data.json after install.
+ * Ensures projectRoot and configFilePath are vault-relative (not absolute).
+ * The vault opens at targetDir, so projectRoot should be relative from there.
  */
 async function fixPresetPaths(targetDir, projectRoot) {
   const dataJsonPath = path.join(targetDir, '.obsidian', 'plugins', 'vault-cms', 'data.json');
@@ -411,14 +412,14 @@ async function fixPresetPaths(targetDir, projectRoot) {
   try {
     const data = JSON.parse(await fs.readFile(dataJsonPath, 'utf8'));
 
-    // Set projectRoot to the actual project root
-    data.projectRoot = projectRoot;
+    // Calculate vault-relative path to project root
+    // If targetDir IS the project root, this will be "."
+    const relativeProjectRoot = path.relative(targetDir, projectRoot).split(path.sep).join('/') || '.';
+    data.projectRoot = relativeProjectRoot;
 
-    // Fix configFilePath: preserve the relative portion (e.g. src/config.ts or astro.config.mjs)
+    // Fix configFilePath: extract the relative portion and make it vault-relative
     if (data.configFilePath) {
-      // Extract just the filename or relative path from the old absolute path
       const oldConfigPath = data.configFilePath.replace(/\\/g, '/');
-      // Look for common config file patterns
       const configPatterns = [
         'src/config.ts', 'src/config.js', 'src/config.mjs',
         'astro.config.mjs', 'astro.config.ts', 'astro.config.js'
@@ -431,7 +432,9 @@ async function fixPresetPaths(targetDir, projectRoot) {
         }
       }
       if (relativeConfig) {
-        data.configFilePath = path.join(projectRoot, relativeConfig);
+        // Path from vault (targetDir) to config file via project root
+        const absoluteConfigPath = path.join(projectRoot, relativeConfig);
+        data.configFilePath = path.relative(targetDir, absoluteConfigPath).split(path.sep).join('/');
       }
     }
 
