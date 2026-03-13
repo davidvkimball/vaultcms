@@ -20,7 +20,7 @@ The fastest way to install Vault CMS into your Astro project is via the CLI at y
 pnpm create vaultcms
 ```
 
-*The installer will detect your Astro project, scan your routes, and install at the project root by default for full asset compatibility.*
+*The installer detects your Astro project and defaults to `src/content` (use `.` for project root).*
 
 ### Manual Installation
 
@@ -28,8 +28,8 @@ If you prefer to install manually, you can download the latest version of Vault 
 
 1. **Download the source**: [Clone this repository](https://github.com/davidvkimball/vaultcms) or [download the ZIP archive](https://github.com/davidvkimball/vaultcms/archive/refs/heads/master.zip).
 2. **Locate your project root**: This is typically the directory containing `astro.config.mjs` and `package.json`.
-3. **Move the files**: Copy the `.obsidian` and `_bases` folders (and `_GUIDE.md`) from the Vault CMS source into your project root.
-4. **Open in Obsidian**: Open the project root as a new vault in Obsidian.
+3. **Move the files**: Copy the `.obsidian` and `_bases` folders (and `_GUIDE.md`) into your project—typically `src/content`, or project root if you prefer.
+4. **Open in Obsidian**: Open that folder as a new vault in Obsidian.
 
 ### Presets
 

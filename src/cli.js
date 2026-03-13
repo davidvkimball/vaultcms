@@ -53,10 +53,21 @@ program
         }
       }
 
-      // Always default to project root — presets are configured for root installs
-      const defaultInstallPath = '.';
+      // Default: src/content when Astro project detected or preset specifies it, . for root fallback
+      let defaultInstallPath = '.';
 
       if (!targetPath) {
+        // When template selected, consult preset manifest for install target
+        if (template) {
+          const manifest = await fetchPresetManifest();
+          const presetConfig = manifest?.presets?.[template.toLowerCase()];
+          if (presetConfig?.installTarget) {
+            defaultInstallPath = presetConfig.installTarget;
+          } else {
+            defaultInstallPath = 'src/content';
+          }
+        }
+
         // When no target specified, detect from cwd for the interactive prompt
         const cwd = process.cwd();
         const detectionBase = path.resolve(cwd);
@@ -65,6 +76,7 @@ program
         const detectedRoutes = isAstroProject ? await detectAstroRoutes(projectRoot) : [];
 
         if (isAstroProject && !template) {
+          defaultInstallPath = 'src/content';
           console.log(`\n📂 Detected Astro project at ${projectRoot}`);
 
           // Show detected content collections
@@ -89,15 +101,14 @@ program
             }
           }
 
-          console.log('\n📂 Installing at project root (.) ensures all images and assets');
-          console.log('   display correctly in Obsidian.\n');
+          console.log('\n📂 Default install target: src/content (use . for project root)\n');
         }
 
         const answers = await inquirer.prompt([
           {
             type: 'input',
             name: 'path',
-            message: 'Where should we install Vault CMS? (use . for current folder)',
+            message: 'Where should we install Vault CMS? (src/content or . for root)',
             default: defaultInstallPath,
           }
         ]);
@@ -167,7 +178,7 @@ program
         throw new Error(`Template "${template}" not found in presets repository.`);
       }
 
-      const toKeep = ['_bases', '.obsidian', '_GUIDE.md'];
+      const toKeep = template ? ['_bases', '.obsidian'] : ['_bases', '.obsidian', '_GUIDE.md'];
       for (const item of toKeep) {
         const src = path.join(sourcePath, item);
         const dest = path.join(targetDir, item);
@@ -178,8 +189,8 @@ program
         }
       }
 
-      // For preset installs: fetch _GUIDE.md from main repo if preset didn't include it
-      if (template && !(await fs.pathExists(path.join(targetDir, '_GUIDE.md')))) {
+      // For preset installs: always fetch _GUIDE.md from main repo (never from preset)
+      if (template) {
         try {
           const mainZipUrl = 'https://github.com/davidvkimball/vaultcms/archive/refs/heads/master.zip';
           const mainTempZip = path.join(targetDir, 'vaultcms-main-temp.zip');
@@ -197,7 +208,7 @@ program
             const guideSrc = path.join(mainInner, '_GUIDE.md');
             if (await fs.pathExists(guideSrc)) {
               await fs.copy(guideSrc, path.join(targetDir, '_GUIDE.md'), { overwrite: true });
-              console.log('  ✓ Added _GUIDE.md (from main repo)');
+              console.log('  ✓ Added _GUIDE.md (from main vaultcms repo)');
             }
           }
 
@@ -600,6 +611,23 @@ function fetchTemplates() {
         }
       });
     }).on('error', () => resolve(['chiri', 'slate', 'starlight']));
+  });
+}
+
+async function fetchPresetManifest() {
+  return new Promise((resolve) => {
+    const url = 'https://raw.githubusercontent.com/davidvkimball/vaultcms-presets/master/manifest.json';
+    https.get(url, { headers: { 'User-Agent': 'vaultcms-installer' } }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          resolve(null);
+        }
+      });
+    }).on('error', () => resolve(null));
   });
 }
 

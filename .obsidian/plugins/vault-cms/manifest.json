@@ -1,7 +1,7 @@
 {
 	"id": "vault-cms",
 	"name": "Vault CMS",
-	"version": "0.4.7",
+	"version": "0.4.8",
 	"minAppVersion": "1.11.0",
 	"description": "Companion plugin for Vault CMS with setup wizard.",
 	"author": "David V. Kimball",
