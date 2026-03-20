@@ -1,5 +1,6 @@
 {
   "pluginList": [
+    "mnaoumov/obsidian-nested-properties",
     "davidvkimball/obsidian-property-over-file-name",
     "davidvkimball/obsidian-file-name-history",
     "davidvkimball/obsidian-explorer-focus",
@@ -14,6 +15,10 @@
     "davidvkimball/obsidian-astro-composer"
   ],
   "pluginSubListFrozenVersion": [
+    {
+      "repo": "mnaoumov/obsidian-nested-properties",
+      "version": "latest"
+    },
     {
       "repo": "davidvkimball/obsidian-property-over-file-name",
       "version": "latest"
